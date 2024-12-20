@@ -1,0 +1,101 @@
+<snippet>
+	<content><![CDATA[
+#include<bits/stdc++.h>
+#define int long long
+
+using namespace std;
+
+const int N = (int)(2e5+5);  // Define a constant N for the maximum number of nodes in the tree.
+vector<int> tree[N];          // Adjacency list representation of the tree.
+int val[N];                   // Array to store values associated with each node.
+int in[N], out[N], rin[N];    // Arrays to store the in-time, out-time, and reversed in-time for each node.
+int T = 0;                    // Global variable to keep track of the current time during DFS traversal.
+
+void dfs(int s, int p){       // Depth-First Search traversal of the tree to calculate in, out, and reversed in times.
+    in[s] = T++;              // Set in-time for node s.
+    rin[in[s]] = val[s];      // Set reversed in-time for node s.
+    for(int v: tree[s]){      // Traverse neighbors of node s.
+        if(v != p) dfs(v, s); // Recursively visit the neighbor if it is not the parent.
+    } 
+    out[s] = T;               // Set out-time for node s.
+}
+
+int st[4*N];                   // Segment tree array to store the sum of values in a range.
+
+void build(int beg, int end, int pos){  // Build the segment tree.
+    if(beg == end){
+        st[pos] = rin[beg];      // Leaf node stores the value at the reversed in-time.
+        return;
+    }
+
+    int mid = (beg + end) / 2;   // Calculate the middle index.
+    build(beg, mid, 2*pos+1);    // Recursively build left subtree.
+    build(mid+1, end, 2*pos+2);  // Recursively build right subtree.
+    st[pos] = st[2*pos+1] + st[2*pos+2];  // Combine values of left and right subtrees.
+}
+
+int query(int beg, int end, int ql, int qr, int pos){  // Query the segment tree for the sum in a range.
+    if(ql <= beg and qr >= end){
+        return st[pos];         // If the current segment is completely within the query range, return its value.
+    } else if(qr < beg or ql > end) 
+        return 0;               // If the current segment is completely outside the query range, return 0.
+
+    int mid = (beg + end) / 2;  // Calculate the middle index.
+    return query(beg, mid, ql, qr, 2*pos+1) + query(mid+1, end, ql, qr, 2*pos+2);  // Recursively query left and right subtrees.
+}
+
+void update(int beg, int end, int idx, int val, int pos){  // Update the segment tree for a single node value.
+    if(beg == end){
+        st[pos] = val;           // If the segment corresponds to the node, update its value.
+        return;
+    }
+    int mid = (beg + end) / 2;   // Calculate the middle index.
+    if(idx <= mid){
+        update(beg, mid, idx, val, 2*pos+1);  // If the node to be updated is in the left subtree, recursively update it.
+    } else{
+        update(mid+1, end, idx, val, 2*pos+2);  // If the node to be updated is in the right subtree, recursively update it.
+    }
+
+    st[pos] = st[2*pos+1] + st[2*pos+2];  // Update the current node with the new values of its children.
+}
+
+signed main(){
+    int n, q; cin >> n >> q;  // Input the number of nodes and queries.
+    for(int i=1; i<=n; i++) cin >> val[i];  // Input values for each node.
+
+    for(int i=0; i<n-1; i++){
+        int u, v;
+        cin >> u >> v;
+        tree[u].push_back(v);  // Input the edges of the tree.
+        tree[v].push_back(u);
+    }
+
+    dfs(1, 0);  // Perform DFS traversal to calculate in, out, and reversed in times.
+    build(0, n-1, 0);  // Build the segment tree using the reversed in-times.
+    
+    while(q--){
+        int type;
+        cin >> type;  // Input the query type.
+
+        if(type == 1){
+            int s, v;
+            cin >> s >> v;
+            update(0, n-1, in[s], v, 0);  // Update the value of a node.
+        } else{
+            int s;
+            cin >> s;
+            cout << query(0, n-1, in[s], out[s]-1, 0) << "\n";  // Query the sum of values in the subtree rooted at node s.
+        }
+    }
+
+    return 0;
+}
+
+
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>etour</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

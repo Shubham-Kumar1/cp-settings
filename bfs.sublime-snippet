@@ -1,0 +1,27 @@
+<snippet>
+	<content><![CDATA[
+void bfs(vector<int> adj[], vector<bool>& visited, vector<int>& distance, int src) {
+    queue<int> q;
+    q.push(src);
+    distance[src] = 0;
+    visited[src] = true;
+
+    while (!q.empty()) {
+        int node = q.front();  q.pop();
+        //cout << node << " ";
+        for (int v : adj[node]) {
+            if (!visited[v]) {
+                distance[v] = distance[node] + 1;
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>bfs</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>

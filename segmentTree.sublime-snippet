@@ -1,0 +1,76 @@
+<snippet>
+	<content><![CDATA[
+class SegmentTree {
+public:
+    // Constructor to initialize the segment tree
+    SegmentTree(const vector<ll>& input) {
+        n = input.size();  // Number of elements in the input array
+        a = input;         // Copy the input array
+        st.resize(4 * n);  // Allocate space for the segment tree
+        build(0, n - 1, 0); // Build the segment tree
+    }
+ 
+    // Update the value at index idx with a new value val
+    void update(ll idx, ll val) {
+        update(0, n - 1, idx, val, 0);
+    }
+ 
+    // Query the minimum value within the range [ql, qr]
+    ll query(ll ql, ll qr) {
+        return query(0, n - 1, ql, qr, 0);
+    }
+ 
+private:
+    ll n;           // Number of elements in the array
+    vector<ll> a;   // The input array
+    vector<ll> st;  // The segment tree array
+ 
+    // Build the segment tree recursively
+    void build(ll beg, ll end, ll pos) {
+        if (beg == end) {
+            st[pos] = a[beg];  // Leaf node, store the value
+            return;
+        }
+ 
+        ll mid = (beg + end) / 2;
+        build(beg, mid, 2 * pos + 1);     // Build left child
+        build(mid + 1, end, 2 * pos + 2); // Build right child
+        st[pos] = min(st[2 * pos + 1], st[2 * pos + 2]); // Update the parent node
+    }
+ 
+    // Update the segment tree after changing a value
+    void update(ll beg, ll end, ll idx, ll val, ll pos) {
+        if (beg == end) {
+            st[pos] = val; // Update the leaf node
+            return;
+        }
+ 
+        ll mid = (beg + end) / 2;
+        if (idx <= mid) {
+            update(beg, mid, idx, val, 2 * pos + 1); // Update left child
+        } else {
+            update(mid + 1, end, idx, val, 2 * pos + 2); // Update right child
+        }
+ 
+        st[pos] = min(st[2 * pos + 1], st[2 * pos + 2]); // Update the parent node
+    }
+ 
+    // Query the minimum value in a given range
+    ll query(ll beg, ll end, ll ql, ll qr, ll pos) {
+        if (ql <= beg && qr >= end) {
+            return st[pos]; // The current segment is completely inside the query range
+        } else if (ql > end || qr < beg) {
+            return INT_MAX; // The current segment is completely outside the query range
+        }
+ 
+        ll mid = (beg + end) / 2;
+        return min(query(beg, mid, ql, qr, 2 * pos + 1), query(mid + 1, end, ql, qr, 2 * pos + 2));
+        // Recursively query both child segments
+    }
+};
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>segment</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.c++</scope>
+</snippet>
